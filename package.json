@@ -2,6 +2,15 @@
   "name": "hack-the-unreachable",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.18" },
-  "scripts": {}
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "balance": "node --env-file-if-exists=.env scripts/balance.ts",
+    "check-wallet": "node --env-file-if-exists=.env scripts/check-wallet.ts",
+    "hello-claude": "node --env-file-if-exists=.env scripts/hello-claude.ts"
+  },
+  "dependencies": {
+    "viem": "2.21.55"
+  }
 }

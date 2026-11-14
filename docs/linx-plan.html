@@ -1,0 +1,231 @@
+<title>LINX for Teams Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: single reading column, ~720px, with a wider band for the gap chart and the how-it-works steps */
+:root {
+  --bg: #F6F7F9; --surface: #FFFFFF; --fg: #16202A; --muted: #5A6775; --line: #DCE1E7;
+  --accent: #0E7C7B; --accent-soft: #E1F2F1;
+  --lead: #6B7A8C; --twin: #0E7C7B; --real: #C9771B;
+  --font-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F151B; --surface: #172029; --fg: #E6ECF1; --muted: #93A1AF; --line: #2A3540;
+  --accent: #3DBDB9; --accent-soft: #15302F; --lead: #8D9BAB; --twin: #3DBDB9; --real: #E8A04B; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F151B; --surface: #172029; --fg: #E6ECF1; --muted: #93A1AF; --line: #2A3540;
+  --accent: #3DBDB9; --accent-soft: #15302F; --lead: #8D9BAB; --twin: #3DBDB9; --real: #E8A04B; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; }
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; }
+section { display: grid; gap: 16px; }
+.label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+.lede { font-size: 1.15rem; color: var(--fg); }
+.pitch { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 16px 20px; font-size: 1.05rem; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.stat b { font-family: var(--font-display); font-size: 1.6rem; }
+.stat span { font-size: 0.85rem; color: var(--muted); }
+
+.steps { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.step { display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.step .n { font-family: var(--font-mono); color: var(--accent); font-size: 0.9rem; padding-top: 2px; }
+.step div { min-width: 0; display: grid; gap: 4px; }
+.step.hl { background: var(--accent-soft); margin-inline: -12px; padding-inline: 12px; border-radius: 6px; }
+.tag { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 1px 8px; margin-left: 8px; vertical-align: 2px; }
+
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; display: grid; gap: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.row > span { font-size: 0.9rem; }
+.bars { display: grid; gap: 4px; min-width: 0; }
+.bar { height: 14px; border-radius: 3px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;
+  font-family: var(--font-mono); font-size: 0.7rem; color: #fff; min-width: 34px; }
+.callout { font-family: var(--font-display); font-size: 1.1rem; border-top: 1px solid var(--line); padding-top: 12px; }
+.callout strong { color: var(--real); }
+
+.whatif { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
+.q p:first-child { font-weight: 600; }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+td.num { white-space: nowrap; }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.two > div { display: grid; gap: 10px; align-content: start; min-width: 0; }
+footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+
+@media (max-width: 640px) {
+  .stats, .whatif, .two { grid-template-columns: 1fr; }
+  .row { grid-template-columns: 1fr; gap: 6px; }
+}
+</style>
+
+<div class="wrap">
+
+<header style="display:grid;gap:14px">
+  <p class="label">Flashpoint.AI hackathon · working plan · 14 Nov 2026</p>
+  <h1>LINX for Teams</h1>
+  <p class="lede">See what your training budget is really buying, and test decisions before you make them.</p>
+  <p class="pitch">An AI twin of your workforce predicts where leadership's assumptions are wrong. A five-question pulse to real employees confirms it. Leaders see the gap in dollars, then use the twin to simulate “what if” decisions before spending the next one.</p>
+  <p class="muted" style="font-size:.85rem">Working name. We may rename the product.</p>
+</header>
+
+<section>
+  <p class="label">The problem</p>
+  <h2>Leaders fund training based on assumptions nobody checks</h2>
+  <div class="stats">
+    <div class="stat"><b class="num">$1,254</b><span>spent per employee on training each year</span></div>
+    <div class="stat"><b class="num">8%</b><span>of CEOs see business impact from it</span></div>
+    <div class="stat"><b class="num">75%</b><span>of learners in our study quit at least one course</span></div>
+  </div>
+  <p>Leaders assume people finish courses and quit because the material is hard. Prachi's research found something else: people quit when the course doesn't match who they are trying to become, and many enroll because of pressure from managers or peers. Flashpoint's study plan calls this the perception gap. Engagement tools don't measure it, and skills tools don't explain it.</p>
+</section>
+
+<section>
+  <p class="label">How it works</p>
+  <h2>Six steps, from assumptions to decisions</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div><h3>Map the workforce</h3><p class="muted">The company uploads an anonymous headcount mix: departments, levels, tenure, locations. No names. LINX builds a matching AI twin through Flashpoint.</p></div></div>
+    <div class="step"><span class="n">2</span><div><h3>Capture leadership's assumptions</h3><p class="muted">Leaders answer the matched questions first: expected completion, why people quit, why they enroll, which skills matter most.</p></div></div>
+    <div class="step"><span class="n">3</span><div><h3>Twin forecast</h3><p class="muted">The twin answers the employee version in minutes. Leaders get an early read on likely gaps, and the survey gets tested before anyone real sees it.</p></div></div>
+    <div class="step"><span class="n">4</span><div><h3>Five-question real pulse</h3><p class="muted">Real employees get a short survey through Flashpoint's email distribution. The twin handles the long exploratory questions so people aren't over-surveyed.</p></div></div>
+    <div class="step"><span class="n">5</span><div><h3>Three-way gap, in dollars</h3><p class="muted">Leadership belief vs. twin forecast vs. employee reality, translated into training spend at risk. A deck is generated for the leadership team.</p></div></div>
+    <div class="step hl"><span class="n">6</span><div><h3>What-if simulator<span class="tag">new</span></h3><p class="muted">Leaders test policy and investment ideas on the twin before rolling them out. Every real pulse recalibrates the twin, so the simulations get more accurate each quarter.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <p class="label">The core output</p>
+  <h2>The three-way gap</h2>
+  <div class="chart" role="img" aria-label="Illustrative chart: leadership believes 70 percent course completion, the twin forecasts 41 percent, employees report 36 percent.">
+    <div class="legend"><span><i style="background:var(--lead)"></i>Leadership believes</span><span><i style="background:var(--twin)"></i>Twin forecast</span><span><i style="background:var(--real)"></i>Employees report</span></div>
+    <div class="row"><span>Course completion</span><div class="bars">
+      <div class="bar" style="width:70%;background:var(--lead)">70%</div>
+      <div class="bar" style="width:41%;background:var(--twin)">41%</div>
+      <div class="bar" style="width:36%;background:var(--real)">36%</div></div></div>
+    <div class="row"><span>Quit because content is too hard</span><div class="bars">
+      <div class="bar" style="width:55%;background:var(--lead)">55%</div>
+      <div class="bar" style="width:22%;background:var(--twin)">22%</div>
+      <div class="bar" style="width:18%;background:var(--real)">18%</div></div></div>
+    <div class="row"><span>Enrolled due to manager or peer pressure</span><div class="bars">
+      <div class="bar" style="width:15%;background:var(--lead)">15%</div>
+      <div class="bar" style="width:39%;background:var(--twin)">39%</div>
+      <div class="bar" style="width:44%;background:var(--real)">44%</div></div></div>
+    <p class="callout">About <strong class="num">$408,000</strong> of a $1.2M training budget is going to courses leadership thinks people finish, but they don't.</p>
+    <p class="muted" style="font-size:.8rem">Illustrative numbers for a fictional 1,200-person company. Spend at risk = budget × (believed completion − real completion).</p>
+  </div>
+  <div class="two">
+    <div><h3>Belief vs. reality</h3><p class="muted">The gap buyers pay for. It shows where ROI assumptions are wrong and turns an HR insight into a finance number.</p></div>
+    <div><h3>Twin vs. reality</h3><p class="muted">Shown as an accuracy score, for example “78% match, up from 64%”. Where real employees still differ from a well-matched twin, the cause is something specific to the company, such as culture or managers.</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="label">New feature</p>
+  <h2>What-if simulator</h2>
+  <p>Leaders ask the twin about a decision before making it. LINX runs the scenario on the twin through Flashpoint, shows the predicted change with the twin's accuracy score next to it, and suggests a short real pulse to confirm the result if the decision is big.</p>
+  <div class="whatif">
+    <div class="q"><p>“What if managers stop requiring enrollment?”</p><p class="muted">Predicts the change in completion and enrollment when pressure is removed.</p></div>
+    <div class="q"><p>“What if we fund a data-skills track for operations?”</p><p class="muted">Shows who signs up, who drifts, and the expected completion by learner type.</p></div>
+    <div class="q"><p>“What if courses are tied to a named career path?”</p><p class="muted">Tests Prachi's identity finding: does clarity about a future role raise completion?</p></div>
+    <div class="q"><p>“What happens to engineering if we cut the budget 20%?”</p><p class="muted">Shows which teams and skills lose the most, before the cut lands.</p></div>
+  </div>
+  <p class="muted">This is what makes LINX a tool leaders open every month, not a report they read once. Each answer is labeled as a forecast until a real pulse confirms it.</p>
+</section>
+
+<section>
+  <p class="label">The population problem</p>
+  <h2>Making the twin look like the company</h2>
+  <ul>
+    <li><b>Match the mix.</b> The twin is built from the company's own headcount breakdown, not a generic panel. Flashpoint scores how well each synthetic panel fits its target population.</li>
+    <li><b>Calibrate every round.</b> Each real pulse is used to recalibrate the twin, so it gets closer to that specific company over time.</li>
+    <li><b>Show the accuracy.</b> The match score is always visible. If it is low, LINX says so and leans on real data.</li>
+    <li><b>Later: connect real systems.</b> Headcount from Workday or BambooHR, completion from the learning platform. Surveys are then needed only for the “why” questions.</li>
+  </ul>
+</section>
+
+<section>
+  <p class="label">Business case</p>
+  <h2>Why companies would pay</h2>
+  <div class="two">
+    <div>
+      <h3>Buyer</h3><p class="muted">CHROs and L&amp;D leaders at companies of 500+ people with a training budget. The CFO cares about the dollar gap.</p>
+      <h3>Pricing (starting idea)</h3><p class="muted">Annual subscription per employee, plus research credits for real pulses and paid panels. A free 10-minute snapshot (three questions plus a twin forecast) acts as the sales hook.</p>
+    </div>
+    <div>
+      <h3>Why us</h3><p class="muted">Culture Amp, Lattice and Viva Glint measure engagement. Degreed and Workday track skills. None shows leaders where their own assumptions are wrong, forecasts results before a survey, or lets them simulate a decision.</p>
+      <h3>Moat</h3><p class="muted">Each company's twin gets more accurate with every pulse. A competitor starts from zero.</p>
+    </div>
+  </div>
+  <p class="muted"><b>Privacy:</b> results are shown only in groups of 5 or more, with no names, and synthetic answers are always labeled and never counted as real employees.</p>
+</section>
+
+<section>
+  <p class="label">Under the hood</p>
+  <h2>Where Flashpoint fits</h2>
+  <p class="muted">LINX's agent signs in to Flashpoint's MCP server with its own wallet and pays per call in USDC on Base (x402). No charge when a call fails.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>LINX feature</th><th>Flashpoint tool</th><th>Price per call</th></tr></thead>
+    <tbody>
+      <tr><td>Build and run the workforce twin</td><td>panel (create and run)</td><td class="num">$0.60</td></tr>
+      <tr><td>What-if questions and follow-ups</td><td>chat (ask an existing panel)</td><td class="num">$0.01</td></tr>
+      <tr><td>Real-employee pulse survey</td><td>tool_survey + email distribution</td><td class="num">$0.50</td></tr>
+      <tr><td>Population context</td><td>demographics</td><td class="num">$0.05</td></tr>
+      <tr><td>Leadership deck</td><td>presentation</td><td class="num">$0.25</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <p class="label">Hackathon demo · about 3 minutes · about $2 per run</p>
+  <h2>What the judges see</h2>
+  <div class="steps">
+    <div class="step"><span class="n">0:00</span><div><p>A fictional 1,200-person bank. A judge enters leadership's assumptions.</p></div></div>
+    <div class="step"><span class="n">0:40</span><div><p>LINX builds the twin through Flashpoint. The payment appears on screen.</p></div></div>
+    <div class="step"><span class="n">1:20</span><div><p>The three-way gap and the dollar figure appear. The “real” leg uses Prachi's real study responses, clearly labeled.</p></div></div>
+    <div class="step"><span class="n">2:00</span><div><p>A judge asks a what-if question live. The twin answers, shown with its accuracy score.</p></div></div>
+    <div class="step"><span class="n">2:40</span><div><p>LINX generates the leadership deck and a learning-path plan by learner type.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <p class="label">Risks and answers</p>
+  <h2>What we'll be asked</h2>
+  <ul>
+    <li><b>“Why trust fake employees?”</b> The twin is a forecast, always shown with its accuracy score, and confirmed by a real pulse.</li>
+    <li><b>“We already run engagement surveys.”</b> LINX is a training ROI and planning tool, and it means fewer surveys, not more.</li>
+    <li><b>“Enterprise HR sales are slow.”</b> The free snapshot shortens the first conversation.</li>
+  </ul>
+</section>
+
+<section>
+  <p class="label">Open items</p>
+  <h2>Decisions and questions for Flashpoint staff</h2>
+  <ul>
+    <li>Team: confirm the product name, and the per-call spending cap for the demo (proposed $1 per call, $3 per run).</li>
+    <li>Flashpoint: can a panel be calibrated against a small real survey, such as Prachi's 20 responses?</li>
+    <li>Flashpoint: can a synthetic panel be built from an uploaded headcount mix?</li>
+    <li>Flashpoint: does the chat tool accept a what-if scenario against an existing panel by id, and how long does it take?</li>
+    <li>Flashpoint: is there a test mode or hackathon credit, so rehearsals don't cost real USDC?</li>
+  </ul>
+</section>
+
+<footer>Sources: Prachi Gupta's “Lost in the Learning Loop” study and LINX for Teams PRD, Flashpoint.AI's Corporate Upskilling Perception Gap Study plan, and the Flashpoint.AI docs (pricing as of 14 Nov 2026). Chart figures are illustrative.</footer>
+</div>
