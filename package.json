@@ -1,0 +1,7 @@
+{
+  "name": "hack-the-unreachable",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {}
+}

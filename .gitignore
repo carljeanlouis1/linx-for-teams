@@ -1,0 +1,14 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+wallet*.json
+cdp_api_key*.json
+
+# Node
+node_modules/
+dist/
+*.log
+.DS_Store
