@@ -179,6 +179,7 @@ aside h3 { font-size: 15px; }
   </nav>
 
   <main>
+    <div class="notice" id="public-note" hidden><b>Public demo.</b> This link runs in Simulated mode: Claude stands in for Flashpoint.AI's synthetic panel, and nothing is paid. The live version signs in to Flashpoint with a wallet and pays each call in USDC on Base (x402). Prices shown are Flashpoint's real per-call prices. Your results are saved only in this browser.</div>
     <section class="card" id="company">
       <div class="head"><div><div class="eyebrow">Step 1</div><h2>Company profile</h2>
         <p class="sub">An anonymous headcount mix. No names. LINX uses it to build a workforce twin that looks like this company, not a generic panel.</p></div></div>
@@ -340,10 +341,35 @@ function sliders(el, obj, color) {
 }
 
 // ---------- status / ledger ----------
+// ---------- public (simulated-only) mode: results live in this visitor's browser ----------
+const LS_KEY = "linx-public-demo-v1";
+function loadLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; } }
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ twin: S.twin, whatifs: S.whatifs, deck: S.deck, ledger: S.ledger })); } catch {} }
+function publicRecord(path, result) {
+  const add = (tool, purpose, usd) => S.ledger.unshift({ at: new Date().toISOString(), tool, purpose, usd, simulated: true });
+  if (path === "/api/twin") { S.twin = result; S.whatifs = []; S.deck = null; add("chat", "Ask the twin the matched questions (simulated)", 0.01); add("panel", "Build workforce twin (simulated)", 0.5); }
+  if (path === "/api/whatif") { S.whatifs.unshift(result); add("chat", `What-if (simulated): ${result.question}`, 0.01); }
+  if (path === "/api/deck") { S.deck = result; add("presentation", "Leadership deck (simulated)", 0.25); }
+  saveLocal();
+}
+S.ledger = [];
+
 async function refreshStatus() {
+  if (S.public) { renderLedger(S.ledger); renderTwin(); renderWhatifs(); renderDeck(); renderGap(); return; }
   try {
     const s = await api("/api/status");
-    S.status = s; S.twin = s.twin; S.whatifs = s.whatifs || []; S.deck = s.deck;
+    S.status = s;
+    if (s.public) {
+      S.public = true; setMode("sim");
+      document.querySelector(".mode").hidden = true;
+      $("#chip-fp").innerHTML = `<span class="dot warn"></span>Public demo · simulated, no payments`;
+      $("#chip-wallet").innerHTML = `<span class="dot"></span>Live Flashpoint runs happen on the team's machine`;
+      $("#public-note").hidden = false;
+      const l = loadLocal(); S.twin = l.twin || null; S.whatifs = l.whatifs || []; S.deck = l.deck || null; S.ledger = l.ledger || [];
+      renderLedger(S.ledger); renderTwin(); renderWhatifs(); renderDeck(); renderGap();
+      return;
+    }
+    S.twin = s.twin; S.whatifs = s.whatifs || []; S.deck = s.deck;
     const fp = $("#chip-fp");
     fp.innerHTML = s.flashpoint.signedIn
       ? `<span class="dot ok"></span>Flashpoint: signed in as <span class="mono">${short(s.address)}</span>`
@@ -391,7 +417,15 @@ function confirmPay(title, items) {
 }
 
 async function runJob(path, body, logEl) {
-  const { jobId } = await api(path, body);
+  if (S.public) logEl.innerHTML = `<div class="log"><div class="now">Running the simulated panel with Claude… (about 15 seconds)</div></div>`;
+  const first = await api(path, body);
+  if (first.status) { // public Worker answers in one request
+    logEl.innerHTML = `<div class="log">${first.steps.map((s) => `<div>${esc(s.text)}</div>`).join("")}</div>`;
+    publicRecord(path, first.result);
+    renderLedger(S.ledger);
+    return first.result;
+  }
+  const { jobId } = first;
   while (true) {
     const j = await api(`/api/jobs/${jobId}`);
     logEl.innerHTML = `<div class="log">${j.steps.map((s, i) => `<div class="${i === j.steps.length - 1 && j.status === "running" ? "now" : ""}">${esc(s.text)}</div>`).join("")}</div>`;
@@ -456,7 +490,7 @@ $("#wi-run").onclick = async () => {
   if (!(await confirmPay("Ask the twin a what-if", [{ tool: "chat (panel scenario)", usd: S.prices.chat ?? 0.01 }]))) return;
   const btn = $("#wi-run"); btn.disabled = true;
   const baseline = Object.fromEntries(METRICS.map((m) => [m.key, Math.round(S.twin.metrics[m.key])]));
-  try { await runJob("/api/whatif", { question: q, simulate: S.mode === "sim", baseline }, $("#wi-log")); $("#wi-log").innerHTML = ""; renderWhatifs(); }
+  try { await runJob("/api/whatif", { question: q, simulate: S.mode === "sim", baseline, twin: { company: S.twin.company } }, $("#wi-log")); $("#wi-log").innerHTML = ""; renderWhatifs(); }
   catch (e) { $("#wi-log").insertAdjacentHTML("beforeend", `<p class="err">${esc(e.message)}</p>`); }
   finally { btn.disabled = false; }
 };

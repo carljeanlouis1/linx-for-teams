@@ -11,7 +11,9 @@
     "hello-claude": "node --env-file-if-exists=.env scripts/hello-claude.ts",
     "fp:quote": "node --env-file-if-exists=.env scripts/probe-flashpoint.ts",
     "demo": "node --env-file-if-exists=.env server.ts",
-    "fp:call": "node --env-file-if-exists=.env scripts/fp-call.ts"
+    "fp:call": "node --env-file-if-exists=.env scripts/fp-call.ts",
+    "cf:secret": "node --env-file-if-exists=.env scripts/push-claude-secret.ts",
+    "cf:deploy": "npx -y wrangler@4 deploy"
   },
   "dependencies": {
     "@x402/core": "2.29.0",
