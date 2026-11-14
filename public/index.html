@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LINX for Teams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0B1117; --panel: #111A22; --panel-2: #16222D; --line: #223241; --fg: #E8EEF3; --muted: #8B9BAA; --dim: #5D6E7E;
+  --accent: #36C3BC; --accent-ink: #062523; --lead: #8E9DB0; --twin: #36C3BC; --real: #F0A54A; --good: #5BD18B; --bad: #FF7A6B;
+  --display: "Plus Jakarta Sans", Inter, system-ui, sans-serif; --body: Inter, system-ui, -apple-system, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.55 var(--body); }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: var(--display); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: rgba(11,17,23,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 18px; }
+.brand .mark { width: 28px; height: 28px; border-radius: 8px; background: conic-gradient(from 200deg, var(--accent), #1F6F8B, var(--real), var(--accent)); display: grid; place-items: center; color: #041214; font-size: 13px; }
+.brand small { font-family: var(--body); font-weight: 500; color: var(--muted); font-size: 13px; }
+.chips { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); font-size: 12.5px; white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+.dot.ok { background: var(--good); box-shadow: 0 0 0 3px rgba(91,209,139,.15); }
+.dot.warn { background: var(--real); }
+.dot.err { background: var(--bad); }
+.mode { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.mode button { border: 0; background: transparent; padding: 6px 12px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
+.mode button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+
+/* layout */
+.app { display: grid; grid-template-columns: 220px minmax(0, 1fr) 340px; gap: 0; min-height: calc(100vh - 57px); }
+.rail { border-right: 1px solid var(--line); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 57px; height: calc(100vh - 57px); }
+.rail a { display: flex; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 500; }
+.rail a:hover { background: var(--panel); color: var(--fg); }
+.rail a.active { background: var(--panel-2); color: var(--fg); }
+.rail .n { font-family: var(--mono); font-size: 11px; width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; border: 1px solid var(--line); }
+.rail a.done .n { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.rail .foot { margin-top: auto; font-size: 12px; color: var(--dim); padding: 8px 10px; }
+main { padding: 28px 32px 80px; display: grid; gap: 28px; align-content: start; min-width: 0; }
+section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: grid; gap: 18px; scroll-margin-top: 80px; }
+.head { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between; flex-wrap: wrap; }
+.head h2 { font-size: 20px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-bottom: 4px; }
+.sub { color: var(--muted); max-width: 62ch; margin-top: 4px; }
+
+/* forms */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+label.f { display: grid; gap: 6px; font-size: 12.5px; color: var(--muted); }
+input[type=text], input[type=number], textarea { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; color: var(--fg); width: 100%; }
+textarea { resize: vertical; min-height: 64px; }
+input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.mix { display: grid; gap: 8px; }
+.mixrow { display: grid; grid-template-columns: 1fr 90px 28px; gap: 8px; align-items: center; }
+.mixbar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--bg); }
+.mixbar span { display: block; height: 100%; }
+.x { background: none; border: 0; color: var(--dim); cursor: pointer; font-size: 16px; }
+.btn { border: 1px solid var(--line); background: var(--panel-2); padding: 9px 14px; border-radius: 9px; cursor: pointer; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn .price { font-family: var(--mono); font-size: 12px; padding: 2px 7px; border-radius: 6px; background: rgba(0,0,0,.18); }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* sliders */
+.sliders { display: grid; gap: 16px; }
+.slider { display: grid; grid-template-columns: minmax(0, 1fr) 220px 52px; gap: 14px; align-items: center; }
+.slider input[type=range] { width: 100%; accent-color: var(--lead); }
+.slider .v { font-family: var(--mono); text-align: right; font-size: 15px; }
+
+/* metrics */
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.metric { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 4px; min-width: 0; }
+.metric b { font-family: var(--display); font-size: 26px; }
+.metric span { color: var(--muted); font-size: 12.5px; }
+.quotes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.quote { border-left: 2px solid var(--twin); padding: 4px 12px; color: var(--muted); font-style: italic; }
+.badge { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; border: 1px solid; white-space: nowrap; }
+.badge.live { color: var(--good); border-color: rgba(91,209,139,.4); }
+.badge.sim { color: var(--real); border-color: rgba(240,165,74,.45); }
+.badge.sample { color: var(--lead); border-color: var(--line); }
+
+/* progress log */
+.log { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); display: grid; gap: 4px; max-height: 180px; overflow: auto; }
+.log .now::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 8px; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+
+/* gap chart */
+.gapgrid { display: grid; gap: 18px; }
+.gaprow { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: center; }
+.bars { display: grid; gap: 5px; min-width: 0; }
+.bar { position: relative; height: 18px; background: var(--bg); border-radius: 5px; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; transition: width .6s cubic-bezier(.2,.7,.2,1); }
+.bar em { position: absolute; right: 8px; top: 0; font-style: normal; font-family: var(--mono); font-size: 11px; line-height: 18px; color: var(--fg); }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+.headline { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.big { background: linear-gradient(135deg, rgba(240,165,74,.14), rgba(240,165,74,.02)); border: 1px solid rgba(240,165,74,.35); border-radius: 12px; padding: 18px; display: grid; gap: 4px; }
+.big b { font-family: var(--display); font-size: 34px; color: var(--real); }
+.kpi { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 4px; }
+.kpi b { font-family: var(--display); font-size: 28px; }
+
+/* what-if */
+.suggest { display: flex; gap: 8px; flex-wrap: wrap; }
+.suggest button { border: 1px dashed var(--line); background: transparent; border-radius: 999px; padding: 6px 12px; color: var(--muted); cursor: pointer; font-size: 12.5px; }
+.suggest button:hover { color: var(--fg); border-color: var(--accent); }
+.wi { border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 12px; background: var(--panel-2); }
+.wi h3 { font-size: 15px; }
+.deltas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.delta { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.delta b { font-family: var(--mono); font-size: 15px; color: var(--fg); }
+.up { color: var(--good) !important; } .down { color: var(--bad) !important; }
+
+/* ledger */
+aside { border-left: 1px solid var(--line); padding: 20px 18px; position: sticky; top: 57px; height: calc(100vh - 57px); overflow: auto; display: flex; flex-direction: column; gap: 14px; }
+aside h3 { font-size: 15px; }
+.total { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.total b { font-family: var(--display); font-size: 22px; }
+.tx { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; background: var(--panel); animation: slidein .4s ease; }
+@keyframes slidein { from { transform: translateY(-6px); opacity: 0; } }
+.tx .r { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.tx .tool { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+.tx .amt { font-family: var(--mono); font-weight: 500; }
+.tx a { color: var(--muted); font-size: 11.5px; font-family: var(--mono); }
+.empty { color: var(--dim); font-size: 13px; border: 1px dashed var(--line); border-radius: 10px; padding: 14px; }
+.how { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 6px; }
+
+/* modal */
+.modal { position: fixed; inset: 0; background: rgba(3,7,10,.7); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.dialog { width: min(440px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: grid; gap: 14px; }
+.dialog .amount { font-family: var(--display); font-size: 36px; }
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 10px; font-size: 12.5px; }
+.kv span:nth-child(odd) { color: var(--muted); }
+.kv span:nth-child(even) { font-family: var(--mono); word-break: break-all; }
+.notice { padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(240,165,74,.4); background: rgba(240,165,74,.08); font-size: 13px; }
+.err { color: var(--bad); font-size: 13px; }
+
+@media (max-width: 1180px) { .app { grid-template-columns: minmax(0, 1fr) 320px; } .rail { display: none; } }
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); } aside { position: static; height: auto; border-left: 0; border-top: 1px solid var(--line); }
+  main { padding: 20px 16px 40px; } .metrics, .deltas { grid-template-columns: repeat(2, minmax(0, 1fr)); } .quotes, .headline { grid-template-columns: 1fr; }
+  .gaprow, .slider { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="mark">L</div>LINX <small>for Teams</small></div>
+  <div class="chips">
+    <span class="chip" id="chip-fp"><span class="dot"></span>Flashpoint: connecting…</span>
+    <span class="chip" id="chip-wallet"><span class="dot"></span>Wallet</span>
+    <div class="mode" role="group" aria-label="Payment mode">
+      <button id="mode-live" aria-pressed="true">Live · pays Flashpoint</button>
+      <button id="mode-sim" aria-pressed="false">Simulated</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <nav class="rail" id="rail">
+    <a href="#company" data-step="company"><span class="n">1</span>Company</a>
+    <a href="#beliefs" data-step="beliefs"><span class="n">2</span>Leadership beliefs</a>
+    <a href="#twin" data-step="twin"><span class="n">3</span>Workforce twin</a>
+    <a href="#pulse" data-step="pulse"><span class="n">4</span>Employee pulse</a>
+    <a href="#gap" data-step="gap"><span class="n">5</span>Gap report</a>
+    <a href="#whatif" data-step="whatif"><span class="n">6</span>What-if simulator</a>
+    <a href="#deck" data-step="deck"><span class="n">7</span>Leadership deck</a>
+    <div class="foot">Research by Flashpoint.AI · paid per call in USDC on Base (x402)</div>
+  </nav>
+
+  <main>
+    <section class="card" id="company">
+      <div class="head"><div><div class="eyebrow">Step 1</div><h2>Company profile</h2>
+        <p class="sub">An anonymous headcount mix. No names. LINX uses it to build a workforce twin that looks like this company, not a generic panel.</p></div></div>
+      <div class="grid">
+        <label class="f">Company<input type="text" id="c-name" value="Harborline Bank"></label>
+        <label class="f">Industry<input type="text" id="c-industry" value="regional banking"></label>
+        <label class="f">Employees<input type="number" id="c-employees" value="1200"></label>
+        <label class="f">Annual training budget ($)<input type="number" id="c-budget" value="1200000"></label>
+        <label class="f">Twin size (personas, max 200)<input type="number" id="c-panel" value="50" min="5" max="200"></label>
+      </div>
+      <label class="f">Training program<input type="text" id="c-program" value="Company-paid AI and data upskilling courses (LinkedIn Learning and Coursera), managers nominate staff each quarter"></label>
+      <div class="mix" id="mix"></div>
+      <div class="mixbar" id="mixbar"></div>
+      <div class="row"><button class="btn" id="add-mix">Add group</button><span class="muted" id="mix-total"></span></div>
+    </section>
+
+    <section class="card" id="beliefs">
+      <div class="head"><div><div class="eyebrow">Step 2</div><h2>What leadership believes</h2>
+        <p class="sub">Leaders answer first. These are the matched questions from the Flashpoint study plan, so every answer can be compared side by side.</p></div></div>
+      <div class="sliders" id="belief-sliders"></div>
+    </section>
+
+    <section class="card" id="twin">
+      <div class="head"><div><div class="eyebrow">Step 3</div><h2>Workforce twin forecast</h2>
+        <p class="sub">LINX signs in to Flashpoint with the company wallet, builds a synthetic panel matched to the headcount mix, and asks it the same questions. Answers in minutes, before anyone real is surveyed.</p></div>
+        <button class="btn primary" id="build-twin">Build twin <span class="price" id="price-twin">…</span></button></div>
+      <div id="twin-body"><p class="empty">No twin yet. Build one to see how this workforce is likely to answer.</p></div>
+    </section>
+
+    <section class="card" id="pulse">
+      <div class="head"><div><div class="eyebrow">Step 4</div><h2>Employee pulse</h2>
+        <p class="sub">Five questions to real employees confirm or correct the twin. In production this goes out through Flashpoint's survey and email distribution; results show only in groups of 5 or more.</p></div>
+        <span class="badge sample">Sample data for the demo</span></div>
+      <div class="sliders" id="pulse-sliders"></div>
+    </section>
+
+    <section class="card" id="gap">
+      <div class="head"><div><div class="eyebrow">Step 5</div><h2>The three-way gap</h2>
+        <p class="sub">Leadership belief, twin forecast and employee reality on the same questions.</p></div></div>
+      <div class="headline">
+        <div class="big"><span class="muted">Training spend at risk</span><b id="risk">—</b><span class="muted" id="risk-note">Budget × (believed completion − real completion)</span></div>
+        <div class="kpi"><span class="muted">Completion gap</span><b id="gap-pts">—</b><span class="muted">believed vs. real</span></div>
+        <div class="kpi"><span class="muted">Twin accuracy</span><b id="accuracy">—</b><span class="muted">match with the real pulse</span></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--lead)"></i>Leadership believes</span><span><i style="background:var(--twin)"></i>Twin forecast</span><span><i style="background:var(--real)"></i>Employees report</span></div>
+      <div class="gapgrid" id="gapgrid"></div>
+    </section>
+
+    <section class="card" id="whatif">
+      <div class="head"><div><div class="eyebrow">Step 6</div><h2>What-if simulator</h2>
+        <p class="sub">Test a decision on the twin before making it. Each answer is a forecast, shown next to the twin's accuracy score.</p></div></div>
+      <div class="row" style="align-items:stretch">
+        <input type="text" id="wi-q" placeholder="What if managers stop nominating people for courses?" style="flex:1;min-width:240px">
+        <button class="btn primary" id="wi-run">Simulate <span class="price" id="price-wi">…</span></button>
+      </div>
+      <div class="suggest" id="wi-suggest"></div>
+      <div id="wi-log"></div>
+      <div id="wi-list" style="display:grid;gap:12px"></div>
+    </section>
+
+    <section class="card" id="deck">
+      <div class="head"><div><div class="eyebrow">Step 7</div><h2>Leadership deck</h2>
+        <p class="sub">Flashpoint turns the gap report and what-if forecasts into an editable PowerPoint for the CHRO and CFO.</p></div>
+        <button class="btn primary" id="make-deck">Generate deck <span class="price" id="price-deck">…</span></button></div>
+      <div id="deck-body"></div>
+    </section>
+  </main>
+
+  <aside>
+    <div><div class="eyebrow">Flashpoint activity</div><h3>Every call, every payment</h3></div>
+    <div class="total"><span class="muted">Spent this session</span><b class="mono" id="spent">$0.00</b></div>
+    <div id="ledger" style="display:grid;gap:8px"></div>
+    <div class="how">
+      <b style="color:var(--fg)">How payment works</b>
+      <span>1. LINX signs a one-time message with the company wallet. Flashpoint returns a 1-hour pass.</span>
+      <span>2. A paid tool answers HTTP 402 with its price. LINX shows it to you.</span>
+      <span>3. On approval, the wallet signs a USDC authorization. Flashpoint settles on Base, then runs the tool. Failed calls are not charged.</span>
+    </div>
+  </aside>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <div class="eyebrow">x402 payment request</div>
+    <h3 id="m-title">Flashpoint is asking for</h3>
+    <div class="amount mono" id="m-amount">$0.00</div>
+    <div class="kv" id="m-kv"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="m-cancel">Cancel</button>
+      <button class="btn primary" id="m-pay">Pay and run</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const fmtUsd = (n) => "$" + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const short = (a) => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+const METRICS = [
+  { key: "completion", label: "Finish the courses they start" },
+  { key: "tooHard", label: "Quit mainly because the content was too hard" },
+  { key: "pressure", label: "Enrolled mainly because a manager or peers expected it" },
+  { key: "identity", label: "Say their training matches who they want to become" },
+];
+const S = {
+  mode: "live", status: null,
+  mix: [
+    { group: "Branch and customer operations", share: 38 }, { group: "Risk, compliance and finance", share: 22 },
+    { group: "Technology and data", share: 14 }, { group: "Commercial lending", share: 16 }, { group: "Corporate functions", share: 10 },
+  ],
+  beliefs: { completion: 70, tooHard: 55, pressure: 15, identity: 65 },
+  pulse: { completion: 36, tooHard: 18, pressure: 44, identity: 31 }, // SAMPLE data
+  twin: null, whatifs: [], deck: null, prices: {},
+};
+const MIXCOLORS = ["#36C3BC", "#2E8FB0", "#F0A54A", "#8E9DB0", "#B48CF2", "#5BD18B"];
+
+// ---------- company mix ----------
+function renderMix() {
+  $("#mix").innerHTML = S.mix.map((m, i) => `
+    <div class="mixrow"><input type="text" value="${esc(m.group)}" data-i="${i}" data-k="group" aria-label="Group name">
+    <input type="number" value="${m.share}" data-i="${i}" data-k="share" aria-label="Share percent" min="0" max="100">
+    <button class="x" data-del="${i}" aria-label="Remove group">×</button></div>`).join("");
+  const total = S.mix.reduce((a, m) => a + Number(m.share || 0), 0);
+  $("#mixbar").innerHTML = S.mix.map((m, i) => `<span style="width:${(m.share / Math.max(total, 100)) * 100}%;background:${MIXCOLORS[i % MIXCOLORS.length]}"></span>`).join("");
+  $("#mix-total").textContent = `Total ${total}%${total !== 100 ? " (should add up to 100%)" : ""}`;
+}
+$("#mix").addEventListener("input", (e) => {
+  const i = e.target.dataset.i; if (i == null) return;
+  S.mix[i][e.target.dataset.k] = e.target.dataset.k === "share" ? Number(e.target.value) : e.target.value;
+  const total = S.mix.reduce((a, m) => a + Number(m.share || 0), 0);
+  $("#mixbar").innerHTML = S.mix.map((m, j) => `<span style="width:${(m.share / Math.max(total, 100)) * 100}%;background:${MIXCOLORS[j % MIXCOLORS.length]}"></span>`).join("");
+  $("#mix-total").textContent = `Total ${total}%${total !== 100 ? " (should add up to 100%)" : ""}`;
+});
+$("#mix").addEventListener("click", (e) => { if (e.target.dataset.del != null) { S.mix.splice(+e.target.dataset.del, 1); renderMix(); } });
+$("#add-mix").onclick = () => { S.mix.push({ group: "New group", share: 0 }); renderMix(); };
+const company = () => ({
+  name: $("#c-name").value, industry: $("#c-industry").value, employees: +$("#c-employees").value,
+  budget: +$("#c-budget").value, panelSize: Math.min(200, Math.max(5, +$("#c-panel").value)), program: $("#c-program").value, mix: S.mix,
+});
+
+// ---------- sliders ----------
+function sliders(el, obj, color) {
+  el.innerHTML = METRICS.map((m) => `
+    <div class="slider"><span>${m.label}</span>
+    <input type="range" min="0" max="100" value="${obj[m.key]}" data-k="${m.key}" style="accent-color:${color}" aria-label="${m.label}">
+    <span class="v">${obj[m.key]}%</span></div>`).join("");
+  el.addEventListener("input", (e) => {
+    const k = e.target.dataset.k; if (!k) return;
+    obj[k] = +e.target.value; e.target.nextElementSibling.textContent = obj[k] + "%"; renderGap();
+  });
+}
+
+// ---------- status / ledger ----------
+async function refreshStatus() {
+  try {
+    const s = await api("/api/status");
+    S.status = s; S.twin = s.twin; S.whatifs = s.whatifs || []; S.deck = s.deck;
+    const fp = $("#chip-fp");
+    fp.innerHTML = s.flashpoint.signedIn
+      ? `<span class="dot ok"></span>Flashpoint: signed in as <span class="mono">${short(s.address)}</span>`
+      : `<span class="dot err"></span>Flashpoint: sign-in failed`;
+    const low = s.usdc != null && s.usdc < 0.5;
+    $("#chip-wallet").innerHTML = `<span class="dot ${s.usdc == null ? "" : low ? "warn" : "ok"}"></span>Wallet <span class="mono">${s.usdc == null ? "?" : s.usdc.toFixed(2)} USDC</span> on Base`;
+    renderLedger(s.ledger); renderTwin(); renderWhatifs(); renderDeck(); renderGap();
+  } catch (e) { $("#chip-fp").innerHTML = `<span class="dot err"></span>Server not reachable`; }
+}
+function renderLedger(ledger) {
+  const live = ledger.filter((l) => !l.simulated);
+  $("#spent").textContent = fmtUsd(live.reduce((a, l) => a + l.usd, 0));
+  $("#ledger").innerHTML = ledger.length ? ledger.slice(0, 30).map((l) => `
+    <div class="tx"><div class="r"><span class="tool">${esc(l.tool)}</span><span class="amt">${fmtUsd(l.usd)}</span></div>
+    <div class="r"><span class="muted" style="font-size:12.5px">${esc(l.purpose)}</span>${l.simulated ? '<span class="badge sim">Sim</span>' : '<span class="badge live">Paid</span>'}</div>
+    ${l.txHash ? `<a href="https://basescan.org/tx/${esc(l.txHash)}" target="_blank" rel="noopener">tx ${esc(short(l.txHash))} on Basescan ↗</a>` : ""}
+    </div>`).join("") : `<div class="empty">No Flashpoint calls yet. Payments appear here as they happen.</div>`;
+}
+
+// ---------- prices (free dry run against Flashpoint's 402) ----------
+async function loadPrices() {
+  const probes = { twin: ["panel", { action: "create", name: "quote", num_respondents: 5, research_objective: "quote" }], chat: ["chat", { message: "quote" }], deck: ["presentation", { title: "quote", data_context: "quote" }] };
+  for (const [k, [tool, args]] of Object.entries(probes)) {
+    try { const q = await api("/api/quote", { tool, args }); S.prices[k] = q.quote?.usd ?? 0; } catch { S.prices[k] = null; }
+  }
+  const p = S.prices;
+  $("#price-twin").textContent = p.twin == null ? "price ?" : fmtUsd(p.twin + (p.chat || 0));
+  $("#price-wi").textContent = p.chat == null ? "price ?" : fmtUsd(p.chat);
+  $("#price-deck").textContent = p.deck == null ? "price ?" : fmtUsd(p.deck);
+}
+
+// ---------- payment confirm ----------
+function confirmPay(title, items) {
+  if (S.mode === "sim") return Promise.resolve(true);
+  const total = items.reduce((a, i) => a + (i.usd || 0), 0);
+  $("#m-title").textContent = title;
+  $("#m-amount").textContent = fmtUsd(total);
+  $("#m-kv").innerHTML = items.map((i) => `<span>${esc(i.tool)}</span><span>${fmtUsd(i.usd)}</span>`).join("") +
+    `<span>From</span><span>${esc(S.status?.address || "")}</span><span>Network</span><span>Base mainnet · USDC</span><span>Protocol</span><span>x402 (EIP-3009)</span>`;
+  $("#modal").hidden = false;
+  return new Promise((res) => {
+    $("#m-pay").onclick = () => { $("#modal").hidden = true; res(true); };
+    $("#m-cancel").onclick = () => { $("#modal").hidden = true; res(false); };
+  });
+}
+
+async function runJob(path, body, logEl) {
+  const { jobId } = await api(path, body);
+  while (true) {
+    const j = await api(`/api/jobs/${jobId}`);
+    logEl.innerHTML = `<div class="log">${j.steps.map((s, i) => `<div class="${i === j.steps.length - 1 && j.status === "running" ? "now" : ""}">${esc(s.text)}</div>`).join("")}</div>`;
+    logEl.querySelector(".log")?.scrollTo(0, 1e6);
+    if (j.status !== "running") { refreshStatus(); if (j.status === "error") throw new Error(j.error); return j.result; }
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+}
+
+// ---------- twin ----------
+$("#build-twin").onclick = async () => {
+  const ok = await confirmPay("Build the workforce twin", [{ tool: "panel (create)", usd: S.prices.twin ?? 0.5 }, { tool: "chat (ask the twin)", usd: S.prices.chat ?? 0.01 }]);
+  if (!ok) return;
+  const btn = $("#build-twin"); btn.disabled = true;
+  const body = $("#twin-body"); body.innerHTML = "<div></div>";
+  try { S.twin = await runJob("/api/twin", { company: company(), simulate: S.mode === "sim" }, body.firstChild); renderTwin(); renderGap(); }
+  catch (e) { body.insertAdjacentHTML("beforeend", `<p class="err">${esc(e.message)}</p>`); }
+  finally { btn.disabled = false; }
+};
+function renderTwin() {
+  const t = S.twin; if (!t) return;
+  const m = t.metrics;
+  $("#twin-body").innerHTML = `
+    <div class="row" style="justify-content:space-between"><span class="muted">${esc(t.company.name)} · ${t.company.panelSize} personas · ${new Date(t.at).toLocaleTimeString()}</span>
+    ${t.simulated ? '<span class="badge sim">Simulated · Claude stand-in</span>' : `<span class="badge live">Flashpoint panel ${esc(short(t.panelId || ""))}</span>`}</div>
+    <div class="metrics">${METRICS.map((x) => `<div class="metric"><b style="color:var(--twin)">${Math.round(m[x.key])}%</b><span>${x.label}</span></div>`).join("")}</div>
+    <div class="quotes">${(m.quotes || []).slice(0, 3).map((q) => `<div class="quote">“${esc(q)}”</div>`).join("")}</div>
+    ${m.summary ? `<p class="muted">${esc(m.summary)}</p>` : ""}`;
+  document.querySelector('[data-step="twin"]').classList.add("done");
+}
+
+// ---------- gap ----------
+function renderGap() {
+  const t = S.twin?.metrics;
+  $("#gapgrid").innerHTML = METRICS.map((m) => {
+    const vals = [["lead", S.beliefs[m.key]], ["twin", t ? Math.round(t[m.key]) : null], ["real", S.pulse[m.key]]];
+    return `<div class="gaprow"><span>${m.label}</span><div class="bars">${vals.map(([c, v]) => `
+      <div class="bar"><i style="width:${v ?? 0}%;background:var(--${c})"></i><em>${v == null ? "build twin" : v + "%"}</em></div>`).join("")}</div></div>`;
+  }).join("");
+  const budget = +$("#c-budget").value || 0;
+  const gap = Math.max(0, S.beliefs.completion - S.pulse.completion);
+  $("#risk").textContent = fmtUsd(Math.round(budget * gap / 100)).replace(".00", "");
+  $("#gap-pts").textContent = (S.beliefs.completion - S.pulse.completion) + " pts";
+  if (t) {
+    const err = METRICS.reduce((a, m) => a + Math.abs(t[m.key] - S.pulse[m.key]), 0) / METRICS.length;
+    $("#accuracy").textContent = Math.max(0, Math.round(100 - err)) + "%";
+  } else $("#accuracy").textContent = "—";
+}
+
+// ---------- what-if ----------
+const SUGGEST = [
+  "What if managers stop nominating people and enrollment becomes opt-in?",
+  "What if every course is tied to a named internal career path?",
+  "What if we fund a data-skills track only for branch operations?",
+  "What if we cut the training budget by 20%?",
+];
+$("#wi-suggest").innerHTML = SUGGEST.map((s) => `<button>${esc(s)}</button>`).join("");
+$("#wi-suggest").onclick = (e) => { if (e.target.tagName === "BUTTON") $("#wi-q").value = e.target.textContent; };
+$("#wi-run").onclick = async () => {
+  const q = $("#wi-q").value.trim() || $("#wi-q").placeholder;
+  if (!S.twin) { $("#wi-log").innerHTML = `<p class="err">Build the workforce twin first (step 3).</p>`; return; }
+  if (!(await confirmPay("Ask the twin a what-if", [{ tool: "chat (panel scenario)", usd: S.prices.chat ?? 0.01 }]))) return;
+  const btn = $("#wi-run"); btn.disabled = true;
+  const baseline = Object.fromEntries(METRICS.map((m) => [m.key, Math.round(S.twin.metrics[m.key])]));
+  try { await runJob("/api/whatif", { question: q, simulate: S.mode === "sim", baseline }, $("#wi-log")); $("#wi-log").innerHTML = ""; renderWhatifs(); }
+  catch (e) { $("#wi-log").insertAdjacentHTML("beforeend", `<p class="err">${esc(e.message)}</p>`); }
+  finally { btn.disabled = false; }
+};
+function renderWhatifs() {
+  const acc = $("#accuracy").textContent;
+  $("#wi-list").innerHTML = S.whatifs.map((w) => `
+    <div class="wi"><div class="row" style="justify-content:space-between"><h3>${esc(w.question)}</h3>
+      ${w.simulated ? '<span class="badge sim">Simulated</span>' : '<span class="badge live">Flashpoint twin</span>'}</div>
+      <p style="margin:0;font-weight:600">${esc(w.headline)}</p>
+      <div class="deltas">${METRICS.map((m) => {
+        const a = Math.round(w.before?.[m.key] ?? 0), b = Math.round(w.after?.[m.key] ?? a), d = b - a;
+        const good = m.key === "completion" || m.key === "identity" ? d > 0 : d < 0;
+        return `<div class="delta">${m.label}<b>${a}% → ${b}% <span class="${d === 0 ? "" : good ? "up" : "down"}">${d > 0 ? "+" : ""}${d}</span></b></div>`;
+      }).join("")}</div>
+      <p class="muted" style="margin:0">${esc(w.why)} <b style="color:var(--fg)">Risk:</b> ${esc(w.risks)}</p>
+      <p class="muted" style="margin:0;font-size:12px">Forecast from the workforce twin · twin accuracy ${acc} · confirm with a real pulse before a big decision</p>
+    </div>`).join("");
+}
+
+// ---------- deck ----------
+$("#make-deck").onclick = async () => {
+  if (!S.twin) { $("#deck-body").innerHTML = `<p class="err">Build the workforce twin first (step 3).</p>`; return; }
+  if (!(await confirmPay("Generate the leadership deck", [{ tool: "presentation", usd: S.prices.deck ?? 0.25 }]))) return;
+  const btn = $("#make-deck"); btn.disabled = true; $("#deck-body").innerHTML = "<div></div>";
+  const report = {
+    company: $("#c-name").value, budget: +$("#c-budget").value, spendAtRisk: $("#risk").textContent, twinAccuracy: $("#accuracy").textContent,
+    metrics: METRICS.map((m) => ({ question: m.label, leadershipBelief: S.beliefs[m.key], twinForecast: Math.round(S.twin.metrics[m.key]), employeePulse_SAMPLE: S.pulse[m.key] })),
+    whatIfs: S.whatifs.map((w) => ({ scenario: w.question, headline: w.headline, after: w.after, why: w.why, risks: w.risks })),
+    twinQuotes: S.twin.metrics.quotes,
+  };
+  try { S.deck = await runJob("/api/deck", { report, simulate: S.mode === "sim" }, $("#deck-body").firstChild); renderDeck(); }
+  catch (e) { $("#deck-body").insertAdjacentHTML("beforeend", `<p class="err">${esc(e.message)}</p>`); }
+  finally { btn.disabled = false; }
+};
+function renderDeck() {
+  const d = S.deck; if (!d) return;
+  $("#deck-body").innerHTML = d.simulated
+    ? `<div class="notice">Simulated mode: the deck is only generated by a live Flashpoint call. Switch to Live to create it.</div>`
+    : d.url ? `<a class="btn" href="${esc(d.url)}" target="_blank" rel="noopener">Download leadership deck (.pptx) ↗</a>`
+    : `<div class="notice">Flashpoint generated the deck but returned no download link.</div>`;
+}
+
+// ---------- mode ----------
+function setMode(m) { S.mode = m; $("#mode-live").setAttribute("aria-pressed", m === "live"); $("#mode-sim").setAttribute("aria-pressed", m === "sim"); }
+$("#mode-live").onclick = () => setMode("live");
+$("#mode-sim").onclick = () => setMode("sim");
+
+// ---------- rail highlight ----------
+const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) document.querySelectorAll(".rail a").forEach((a) => a.classList.toggle("active", a.dataset.step === e.target.id)); }), { rootMargin: "-40% 0px -55% 0px" });
+document.querySelectorAll("section.card").forEach((s) => io.observe(s));
+
+renderMix();
+sliders($("#belief-sliders"), S.beliefs, "var(--lead)");
+sliders($("#pulse-sliders"), S.pulse, "var(--real)");
+renderGap();
+refreshStatus().then(() => { if (S.status && S.status.usdc != null && S.status.usdc < 0.51) setMode("sim"); });
+loadPrices();
+</script>
+</body>
+</html>

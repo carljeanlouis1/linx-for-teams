@@ -8,9 +8,16 @@
   "scripts": {
     "balance": "node --env-file-if-exists=.env scripts/balance.ts",
     "check-wallet": "node --env-file-if-exists=.env scripts/check-wallet.ts",
-    "hello-claude": "node --env-file-if-exists=.env scripts/hello-claude.ts"
+    "hello-claude": "node --env-file-if-exists=.env scripts/hello-claude.ts",
+    "fp:quote": "node --env-file-if-exists=.env scripts/probe-flashpoint.ts",
+    "demo": "node --env-file-if-exists=.env server.ts",
+    "fp:call": "node --env-file-if-exists=.env scripts/fp-call.ts"
   },
   "dependencies": {
-    "viem": "2.21.55"
+    "@x402/core": "2.29.0",
+    "@x402/evm": "2.29.0",
+    "@x402/fetch": "2.29.0",
+    "undici": "8.12.3",
+    "viem": "2.57.13"
   }
 }
